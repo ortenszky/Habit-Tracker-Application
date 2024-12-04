@@ -2,11 +2,14 @@ from db import get_db
 from habit import Habit
 from datetime import datetime
 
+import sqlite3
+from datetime import datetime
+
 def preload_example_data():
     """
     Preload the database with predefined habits and their respective increment dates.
     """
-    db = get_db()
+    db = sqlite3.connect(':memory:')  # Create an in-memory database
     cursor = db.cursor()
 
     # Create tables if they do not exist
@@ -70,21 +73,21 @@ def preload_example_data():
             "13/11/2024 22:50:32", "14/11/2024 23:05:57", "15/11/2024 21:30:41"
         ],
         habit_ids[3]: [  # Cleaning
-            "01/11/2024 10:15:25", "08/11/2024 14:45:32", "15/11/2024 11:35:18",
-            "22/11/2024 16:20:43"
+            "01/11/2024 10:15:25", "08/11/2024 14:45:32", "11/11/2024 11:35:18",
+            "28/11/2024 16:20:43"
         ]
     }
 
     # Insert increment dates for each habit
     for habit_id, dates in increment_dates.items():
         for date in dates:
-            increment_date = datetime.strptime(date, "%d/%m/%Y %H:%M:%S")
             cursor.execute('''
                    INSERT INTO counters (habit_id, increment_date)
                    VALUES (?, ?)
-               ''', (habit_id, increment_date.strftime("%d/%m/%Y %H:%M:%S")))
+               ''', (habit_id, date))  # Store date as a string
     db.commit()
 
     print("Example data preloaded successfully.")
-    db.close()
+    return db  # Return the database connection
+
 
