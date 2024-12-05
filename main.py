@@ -1,14 +1,44 @@
-from random import choice
-
 import questionary
 from datetime import datetime
-from db import get_db, get_counter, get_habits_list, get_habits_by_periodicity
+from db import get_habits_list, get_habits_by_periodicity
 from habit import Habit
 from analyse import get_longest_streak, get_longest_streak_all_habits
+from db_example_db import preload_example_data
+import sqlite3
 
-def main_menu():
-    db = get_db()
 
+
+def is_database_empty(db):
+    """
+    Check if the database is empty by verifying if any habits exist.
+    """
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) FROM habits")
+    result = cursor.fetchone()
+    return result[0] == 0  # Returns True if there are no habits
+
+
+def main():
+    db_path = "main.db"
+    db = sqlite3.connect(db_path)
+
+    # Check if the database is empty
+    if is_database_empty(db):
+        load_data = questionary.confirm(
+            "The database is empty. Do you want to load the example data?"
+        ).ask()
+
+        if load_data:
+            preload_example_data(db_path)
+            print("\nExample data has been loaded successfully.")
+        else:
+            print("\nStarting with an empty database.")
+
+    print("Welcome to the Habit Tracker App!")
+    main_menu(db)
+
+
+def main_menu(db):
     while True:
         choice = questionary.select(
             "Choose an action:",
@@ -191,11 +221,11 @@ def longest_streak_specific(db):
 
 def longest_streak_all(db):
     try:
-        streaks = get_longest_streak_all_habits(db)
-        print(f"\nThe longest streak for all habits are: {streaks} days.")
+        streak = get_longest_streak_all_habits(db)
+        print(f"\nThe longest streak for all habits is {streak} days.")
     except Exception as e:
         print(f"\nError: {e}")
 
 
 if __name__ == "__main__":
-    main_menu()
+    main()
