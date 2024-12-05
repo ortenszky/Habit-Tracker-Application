@@ -97,4 +97,3 @@ def get_longest_streak_all_habits(db):
 
     # Return the overall longest streak in days
     return max(longest_daily_streak, longest_weekly_streak)
-
