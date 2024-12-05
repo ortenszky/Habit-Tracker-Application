@@ -1,15 +1,11 @@
-from db import get_db
-from habit import Habit
-from datetime import datetime
-
 import sqlite3
 from datetime import datetime
 
-def preload_example_data():
+def preload_example_data(db_path=":memory:"):
     """
     Preload the database with predefined habits and their respective increment dates.
     """
-    db = sqlite3.connect(':memory:')  # Create an in-memory database
+    db = sqlite3.connect(db_path)  # Use the provided database path
     cursor = db.cursor()
 
     # Create tables if they do not exist
@@ -40,6 +36,7 @@ def preload_example_data():
         ("Make the bed", "Make the bed in the morning before leaving the house", "daily"),
         ("Reading", "Read 25 pages of a book", "daily"),
         ("Cleaning", "Clean the whole house", "weekly"),
+        ("Drink a protein shake", "Drink a protein shake in order to have enough protein everyday", "daily"),
     ]
 
     # Add habits to the database
@@ -75,6 +72,13 @@ def preload_example_data():
         habit_ids[3]: [  # Cleaning
             "01/11/2024 10:15:25", "08/11/2024 14:45:32", "11/11/2024 11:35:18",
             "28/11/2024 16:20:43"
+        ],
+        habit_ids[4]: [  # Drink a protein shake
+            "01/11/2024 07:45:23", "02/11/2024 07:30:12", "03/11/2024 07:15:48",
+            "04/11/2024 07:00:35", "05/11/2024 07:50:07", "06/11/2024 07:25:54",
+            "07/11/2024 07:10:16", "08/11/2024 07:35:49", "09/11/2024 07:45:31",
+            "10/11/2024 07:20:08", "11/11/2024 07:15:26", "12/11/2024 07:30:42",
+            "13/11/2024 07:50:18", "14/11/2024 07:10:44", "15/11/2024 07:25:07"
         ]
     }
 
@@ -89,5 +93,3 @@ def preload_example_data():
 
     print("Example data preloaded successfully.")
     return db  # Return the database connection
-
-
