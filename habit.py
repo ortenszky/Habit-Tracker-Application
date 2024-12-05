@@ -1,100 +1,103 @@
-from datetime import datetime
+import sqlite3
 
 
-class Habit:
+def get_db():
     """
-        A class to represent a habit and manage its tracking in a database.
+        Initialize and return the database connection, creating the tables habits and counters if they do not exist.
 
-        Attributes:
-            name (str): The name of the habit.
-            description (str): A brief description of the habit.
-            periodicity (str): The frequency of the habit (e.g., daily, weekly).
-            id (int, optional): The database ID of the habit. Defaults to None.
-            creation_date (str): The timestamp when the habit was created.
+        Returns:
+        -------
+        sqlite3.Connection
+            The database connection object.
         """
+    db = sqlite3.connect('main.db')
+    cursor = db.cursor()
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS habits (
+                id INTEGER PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL,
+                description TEXT,
+                periodicity TEXT NOT NULL,
+                creation_date TEXT
+            )
+        ''')
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS counters (
+                id INTEGER PRIMARY KEY,
+                habit_id INTEGER NOT NULL,
+                increment_date TEXT NOT NULL,
+                FOREIGN KEY (habit_id) REFERENCES habits (id)
+            )
+        ''')
+    db.commit()
+    return db
 
-    def __init__(self, name, description, periodicity, id=None):
-        """
-               Initialize a Habit instance.
 
-               Parameters:
-                   name (str): The name of the habit.
-                   description (str): A brief description of the habit.
-                   periodicity (str): The frequency of the habit.
-                   id (int, optional): The database ID of the habit. Defaults to None.
-               """
-        self.name = name
-        self.description = description
-        self.periodicity = periodicity
-        self.id = id
-        self.creation_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+def get_habits_list(db):
+    """
+       Retrieve a list of all the habits from the database.
 
-    def save_to_db(self, db):
-        """
-                Save the habit to the database.
+       Parameters:
+       ----------
+       db : sqlite3.Connection
+           The database connection object.
 
-                Parameter:
-                    db: The database connection object.
+       Returns:
+       -------
+       List[str]
+           A list of habit names.
+       """
+    cursor = db.cursor()
+    cursor.execute('SELECT name FROM habits')
+    return [row[0] for row in cursor.fetchall()]
 
-                Returns:
-                    int: The ID of the newly created habit in the database.
-                """
-        cursor = db.cursor()
-        cursor.execute('''INSERT INTO habits (name, description, periodicity, creation_date)
-                        VALUES (?, ?, ?, ?)''', (self.name, self.description, self.periodicity, self.creation_date))
-        db.commit()
-        self.id = cursor.lastrowid
-        return self.id
 
-    def increment(self, db, increment_date=None):
-        """
-              Increment the habit counter.
+def get_habits_by_periodicity(db, periodicity):
+    """
+    Retrieve a list of habit names filtered by their periodicity.
 
-              Parameters:
-                  db: The database connection object.
-                  increment_date (datetime, optional): The date and time of the increment.
-                                                       Defaults to the current time.
+    Parameters:
+    ----------
+    db : sqlite3.Connection
+        The database connection object.
+    periodicity : str
+        The periodicity to filter by. (daily or weekly)
 
-              Raises:
-                  ValueError: If the habit has not been saved to the database.
-              """
-        if self.id is None:
-            raise ValueError("Habit must be saved to the database before incrementing.")
-        current_time = increment_date.strftime("%d/%m/%Y %H:%M:%S") if increment_date else datetime.now().strftime(
-            "%d/%m/%Y %H:%M:%S")
-        cursor = db.cursor()
-        cursor.execute('''INSERT INTO counters (habit_id, increment_date) VALUES (?, ?)''', (self.id, current_time))
-        db.commit()
+    Returns:
+    -------
+    List[str]
+        A list of habit names matching the given periodicity.
+    """
+    cursor = db.cursor()
+    cursor.execute('SELECT name FROM habits WHERE periodicity = ?', (periodicity,))
+    return[row[0]for row in cursor.fetchall()]
 
-    def reset(self, db):
-        """
-                Reset the habit's counter.
 
-                Parameters:
-                    db: The database connection object.
+def get_counter(db, name):
+    """
+       Retrieve a Counter object for a given habit name.
 
-                Raises:
-                    ValueError: If the habit has not been saved to the database.
-                """
-        if self.id is None:
-            raise ValueError("Habit must be saved to the database before resetting.")
-        cursor = db.cursor()
-        cursor.execute('''DELETE FROM counters WHERE habit_id = ?''', (self.id,))
-        db.commit()
+       Parameters:
+       ----------
+       db : sqlite3.Connection
+           The database connection object.
+       name : str
+           The name of the habit.
 
-    def delete(self, db):
-        """
-                Delete the habit and its associated counters from the database.
+       Returns:
+       -------
+       Optional[Counter]
+           A Counter object if the habit exists, otherwise None.
+    """
+    cursor = db.cursor()
+    cursor.execute('SELECT id FROM habits WHERE name = ?', (name,))
+    habit = cursor.fetchone()
+    if not habit:
+        return 0
 
-                Parame:
-                    db: The database connection object.
+    habit_id = habit[0]
 
-                Raises:
-                    ValueError: If the habit has not been saved to the database.
-                """
-        if self.id is None:
-            raise ValueError("Habit must be saved to the database before deleting.")
-        cursor = db.cursor()
-        cursor.execute('''DELETE FROM habits WHERE id = ?''', (self.id,))
-        cursor.execute('''DELETE FROM counters WHERE habit_id = ?''', (self.id,))
-        db.commit()
+    cursor.execute('SELECT COUNT(*) FROM counters WHERE habit_id = ?', (habit_id,))
+    count = cursor.fetchone()[0]
+
+    return count
