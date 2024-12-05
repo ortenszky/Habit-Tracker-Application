@@ -1,4 +1,3 @@
-import sqlite3
 from datetime import datetime, timedelta
 from habit import Habit
 from analyse import get_longest_streak, get_longest_streak_all_habits
@@ -164,7 +163,7 @@ def test_get_habits_list():
     habits_list = get_habits_list(db)
 
     # Expected habits from db_example_db
-    expected_habits = ["Play the guitar", "Make the bed", "Reading", "Cleaning"]
+    expected_habits = ["Play the guitar", "Make the bed", "Reading", "Cleaning", "Drink a protein shake"]
 
     # Assertions
     assert set(habits_list) == set(expected_habits)
@@ -180,7 +179,7 @@ def test_get_habits_by_periodicity():
 
     # Retrieve daily habits
     daily_habits = get_habits_by_periodicity(db, "daily")
-    expected_daily_habits = ["Play the guitar", "Make the bed", "Reading"]  # From db_example_db
+    expected_daily_habits = ["Play the guitar", "Make the bed", "Reading", "Drink a protein shake"]  # From db_example_db
     assert set(daily_habits) == set(expected_daily_habits)
 
     # Retrieve weekly habits
@@ -268,11 +267,6 @@ def test_get_longest_streak_all_habits():
     db.close()
 
 
-
-
-
-
-
 if __name__ == '__main__':
     test_habit_creation()
     test_habit_incrementation()
@@ -284,5 +278,3 @@ if __name__ == '__main__':
     test_get_longest_streak()
     test_get_longest_streak_all_habits()
     print('All tests passed!')
-
-
