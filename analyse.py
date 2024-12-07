@@ -36,7 +36,7 @@ def get_longest_streak(db, habit_name):
     # Final check for the last streak
     longest_streak = max(longest_streak, current_streak)
 
-    # Convert weekly streak to days for consistent scoring
+    # Convert weekly streak to days
     if periodicity == "weekly":
         longest_streak *= 7
 
