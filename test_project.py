@@ -3,15 +3,16 @@ from habit import Habit
 from analyse import get_longest_streak, get_longest_streak_all_habits
 from db import get_habits_list, get_habits_by_periodicity, get_counter, get_db
 from db_example_db import preload_example_data
+import sqlite3
 
 
 def setup_test_database():
     """
-    Set up the test database using the preloaded example data.
+    Setup a temporary in-memory database with preloaded example data for testing.
     """
-    db = get_db()  
-    preload_example_data(db)  # Pass the database connection to preload the data
-    return db
+    db = sqlite3.connect(':memory:')  # Use an in-memory database
+    preload_example_data(db)  # Load example data into the in-memory database
+    return db  # Return the database connection
 
 
 def test_habit_creation():
