@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from habit import Habit
 from analyse import get_longest_streak, get_longest_streak_all_habits
-from db import get_habits_list, get_habits_by_periodicity, get_counter
+from db import get_habits_list, get_habits_by_periodicity, get_counter, get_db
 from db_example_db import preload_example_data
 
 
