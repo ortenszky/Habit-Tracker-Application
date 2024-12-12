@@ -90,7 +90,6 @@ def preload_example_data(db):
                ''', (habit_id, date))  # Store date as a string
     db.commit()
 
-    print("Example data preloaded successfully.")
     return db  # Return the database connection
 
 
