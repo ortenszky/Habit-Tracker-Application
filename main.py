@@ -158,8 +158,12 @@ def increment_habit(db):
         print("\nThere are no habits found")
         return
 
-    habit_name = questionary.select("Select a habit to check off:", choices=habits).ask()
+    choices = habits + ["Cancel..."]
+    habit_name = questionary.select("Select a habit to check off:", choices=choices).ask()
 
+    if habit_name == "Cancel...":
+        print("\nReturning to Habit Management Options...")
+        return
     try:
         habit = Habit.get_by_name(db, habit_name)
         increment_date = datetime.now()
@@ -175,7 +179,12 @@ def reset_habit(db):
         print("\nThere are no habits found")
         return
 
-    habit_name = questionary.select("Select a habit to reset:", choices=habits).ask()
+    choices = habits + ["Cancel..."]
+    habit_name = questionary.select("Select a habit to check off:", choices=choices).ask()
+
+    if habit_name == "Cancel...":
+        print("\nReturning to Habit Management Options...")
+        return
     try:
         habit = Habit.get_by_name(db, habit_name)
         habit.reset(db)
@@ -190,7 +199,14 @@ def delete_habit(db):
         print("\nNo habits found.")
         return
 
-    habit_name = questionary.select("Select a habit to delete:", choices=habits).ask()
+    choices = habits + ["Cancel..."]
+    habit_name = questionary.select("Select a habit to check off:", choices=choices).ask()
+
+    if habit_name == "Cancel...":
+        print("\nReturning to Habit Management Options...")
+        return
+
+    # Ask for confirmation only if a valid habit is selected
     confirm = questionary.confirm(f"Are you sure you want to delete '{habit_name}' habit?").ask()
 
     if confirm:
@@ -202,7 +218,6 @@ def delete_habit(db):
             print(f"\nError: {e}")
     else:
         print("\nDeleting habits cancelled.")
-        return
 
 
 def longest_streak_specific(db):
