@@ -9,7 +9,8 @@ def setup_test_database():
     """
     Set up the test database using the preloaded example data.
     """
-    db = preload_example_data()  # Preload the example data
+    db = get_db()  
+    preload_example_data(db)  # Pass the database connection to preload the data
     return db
 
 
